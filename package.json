@@ -1,0 +1,22 @@
+{
+  "name": "music-system",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev --workspace=apps/server\" \"npm run dev --workspace=apps/web\"",
+    "build": "npm run build --workspace=apps/server && npm run build --workspace=apps/web",
+    "server": "npm run dev --workspace=apps/server",
+    "web": "npm run dev --workspace=apps/web",
+    "db:migrate": "npm run db:migrate --workspace=apps/server",
+    "db:studio": "npm run db:studio --workspace=apps/server"
+  },
+  "devDependencies": {
+    "@prisma/client": "^5.22.0",
+    "concurrently": "^8.2.2",
+    "prisma": "^5.22.0"
+  }
+}

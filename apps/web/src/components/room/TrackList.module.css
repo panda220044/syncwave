@@ -1,0 +1,62 @@
+.wrapper { display: flex; flex-direction: column; gap: 8px; }
+.addBtn { margin-bottom: 4px; font-size: 0.82rem !important; }
+.list { display: flex; flex-direction: column; gap: 2px; }
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+}
+.trackRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: default;
+  transition: background var(--transition-fast);
+  position: relative;
+}
+.trackRow[title] { cursor: pointer; }
+.trackRow:hover { background: var(--color-surface-2); }
+.trackActive { background: rgba(30,215,96,0.06) !important; }
+.trackActive:hover { background: rgba(30,215,96,0.1) !important; }
+.trackNum { width: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.trackInfo { flex: 1; min-width: 0; }
+.trackTitle {
+  font-size: 0.83rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.trackActive .trackTitle { color: var(--color-green); }
+.trackArtist { font-size: 0.7rem; color: var(--color-text-secondary); margin-top: 1px; }
+.trackMeta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.deleteBtn {
+  position: absolute;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
+  color: var(--color-error);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity var(--transition-fast), background var(--transition-fast);
+}
+.trackRow:hover .deleteBtn { display: flex; }
+.deleteBtn:hover { opacity: 1; background: rgba(239,68,68,0.1); }

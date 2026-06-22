@@ -1,0 +1,46 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 0;
+}
+.qrWrapper {
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  width: fit-content;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+.qrCanvas {
+  width: 220px !important;
+  height: 220px !important;
+  display: block;
+  border-radius: 8px;
+}
+.codeDisplay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.codeLabel {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+}
+.code {
+  font-family: var(--font-mono);
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  color: var(--color-green);
+}
+.hint {
+  font-size: 0.78rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+.actions { width: 100%; }

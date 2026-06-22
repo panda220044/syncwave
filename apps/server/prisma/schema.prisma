@@ -1,0 +1,65 @@
+// This file is read by prisma from apps/server/
+// Run: npx prisma migrate dev --name init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id          String   @id @default(cuid())
+  displayName String
+  token       String   @unique   // Anonymous session token (UUID)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  hostedRooms Room[] @relation("HostedRooms")
+}
+
+model Room {
+  id       String  @id @default(cuid())
+  code     String  @unique  // 6-char alphanumeric e.g. "X7K9PQ"
+  hostId   String
+  host     User    @relation("HostedRooms", fields: [hostId], references: [id])
+  isActive Boolean @default(true)
+
+  playlist       Track[]
+  playbackEvents PlaybackEvent[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Track {
+  id       String  @id @default(cuid())
+  roomId   String
+  room     Room    @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  title    String
+  artist   String?
+  album    String?
+  duration Float   // seconds
+  fileUrl  String  // relative path or public URL
+  mimeType String  @default("audio/mpeg")
+  fileSize Int     @default(0) // bytes
+  order    Int     @default(0)
+  isUrl    Boolean @default(false) // true if streaming from external URL
+
+  createdAt DateTime @default(now())
+}
+
+model PlaybackEvent {
+  id         String   @id @default(cuid())
+  roomId     String
+  room       Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  type       String   // play | pause | seek | stop | next | prev
+  trackId    String?
+  position   Float?   // seconds
+  serverTime Int      // server epoch ms at event time (stored as Int for SQLite compat)
+  deviceId   String?  // who triggered it
+
+  createdAt DateTime @default(now())
+}
