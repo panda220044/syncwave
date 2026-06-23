@@ -63,6 +63,27 @@ export function useAudioPlayer({ socket, offsetRef, volume }: UseAudioPlayerOpti
     return audioCtxRef.current as AudioContext;
   }, []);
 
+  // ── Unlock Audio Context for Mobile ────────────────────────
+  const unlockAudio = useCallback(async (): Promise<boolean> => {
+    try {
+      const ctx = getAudioContext();
+      if (ctx.state === 'suspended') {
+        await ctx.resume();
+      }
+      // Play a short silent buffer to force unlock on iOS
+      const buffer = ctx.createBuffer(1, 1, 22050);
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+      source.connect(ctx.destination);
+      source.start(0);
+      console.log('[Audio] AudioContext successfully unlocked!');
+      return true;
+    } catch (err) {
+      console.error('[Audio] Failed to unlock AudioContext:', err);
+      return false;
+    }
+  }, [getAudioContext]);
+
   // ── Volume Control ─────────────────────────────────────────
   useEffect(() => {
     if (gainNodeRef.current && audioCtxRef.current) {
@@ -293,5 +314,6 @@ export function useAudioPlayer({ socket, offsetRef, volume }: UseAudioPlayerOpti
     handlePlaybackCommand,
     stopSource,
     schedulePlay,
+    unlockAudio,
   };
 }

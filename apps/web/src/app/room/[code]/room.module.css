@@ -160,18 +160,220 @@
   flex-wrap: wrap;
 }
 
-@media (max-width: 768px) {
-  .roomLayout { flex-direction: column; }
-  .sidebar {
-    width: 100%;
-    height: auto;
-    min-width: unset;
-    border-right: none;
-    border-bottom: 1px solid var(--color-border);
-    max-height: 40dvh;
+/* Mobile Header (Hidden on Desktop) */
+.mobileHeader {
+  display: none;
+}
+
+.closeSidebarBtn {
+  display: none;
+}
+
+.sidebarLogoRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.sidebarBackdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(8, 8, 16, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 999;
+  animation: fadeIn var(--transition-normal);
+}
+
+/* Tap-to-Unlock Overlay */
+.unlockOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(8, 8, 16, 0.85);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn var(--transition-normal);
+  padding: var(--space-4);
+}
+
+.unlockCard {
+  background: rgba(30, 30, 48, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: var(--shadow-lg), 0 0 30px rgba(30, 215, 96, 0.1);
+  animation: scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.unlockIcon {
+  width: 80px;
+  height: 80px;
+  border-radius: var(--radius-full);
+  background: rgba(30, 215, 96, 0.1);
+  border: 1px solid rgba(30, 215, 96, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto var(--space-5);
+  color: var(--color-green);
+}
+
+.pulseIcon {
+  animation: pulse 2s infinite;
+}
+
+.unlockTitle {
+  font-size: 1.4rem;
+  font-weight: 800;
+  margin-bottom: var(--space-3);
+  color: var(--color-text-primary);
+}
+
+.unlockText {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-6);
+  line-height: 1.5;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleUp {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(30, 215, 96, 0.4);
   }
-  .nowPlaying { padding: 20px 16px 12px; }
-  .albumArt { width: 160px; height: 160px; }
-  .trackTitle { font-size: 1.2rem; }
-  .hostControls { padding: 12px 16px; }
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 12px rgba(30, 215, 96, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(30, 215, 96, 0);
+  }
+}
+
+/* Responsive Media Queries */
+@media (max-width: 768px) {
+  .roomLayout {
+    flex-direction: column;
+    position: relative;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 290px;
+    height: 100dvh;
+    max-height: none;
+    z-index: 1000;
+    transform: translateX(-100%);
+    transition: transform var(--transition-normal);
+    border-right: 1px solid var(--color-border);
+    border-bottom: none;
+    min-width: unset;
+  }
+
+  .sidebarOpen {
+    transform: translateX(0);
+    box-shadow: 10px 0 40px rgba(0, 0, 0, 0.6);
+  }
+
+  .closeSidebarBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--color-text-secondary);
+    padding: 8px;
+    border-radius: var(--radius-full);
+    transition: all var(--transition-fast);
+  }
+  .closeSidebarBtn:hover {
+    color: var(--color-text-primary);
+    background: var(--color-surface-2);
+  }
+
+  .mobileHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    height: 56px;
+    flex-shrink: 0;
+  }
+
+  .mobileTitle {
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
+    color: var(--color-text-primary);
+    text-transform: uppercase;
+  }
+
+  .sidebarToggle {
+    background: transparent;
+    border: none;
+    color: var(--color-text-secondary);
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-full);
+    transition: all var(--transition-fast);
+  }
+  .sidebarToggle:hover {
+    color: var(--color-text-primary);
+    background: var(--color-surface-2);
+  }
+
+  .main {
+    height: calc(100dvh - 56px);
+  }
+
+  .nowPlaying {
+    padding: 32px 16px 20px;
+    gap: 20px;
+  }
+
+  .albumArt {
+    width: min(200px, 45vw);
+    height: min(200px, 45vw);
+  }
+
+  .trackTitle {
+    font-size: 1.3rem;
+  }
+
+  .hostControls {
+    padding: 16px;
+    justify-content: center;
+    gap: 8px;
+  }
 }

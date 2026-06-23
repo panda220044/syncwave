@@ -17,6 +17,7 @@ import TrackList from '@/components/room/TrackList';
 import SyncStatusBar from '@/components/room/SyncStatusBar';
 import UploadModal from '@/components/room/UploadModal';
 import styles from './room.module.css';
+import { Menu, X, Users, Disc, Volume2, Copy, Share2, LogOut, Plus, Music, Headphones } from 'lucide-react';
 
 interface RoomPageProps {
   params: Promise<{ code: string }>;
@@ -31,6 +32,8 @@ export default function RoomPage({ params }: RoomPageProps) {
   const [showUpload, setShowUpload] = useState(false);
   const [activeTab, setActiveTab] = useState<'devices' | 'playlist' | 'qr'>('devices');
   const [joinUrl, setJoinUrl] = useState('');
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [audioUnlocked, setAudioUnlocked] = useState(false);
 
   // Load auth from localStorage
   useEffect(() => {
@@ -68,13 +71,20 @@ export default function RoomPage({ params }: RoomPageProps) {
     currentTrack,
   } = useRoom({ socket, auth });
 
-  const { playerState, handlePlaybackCommand } = useAudioPlayer({
+  const { playerState, handlePlaybackCommand, unlockAudio } = useAudioPlayer({
     socket,
     offsetRef,
     volume,
   });
 
   // Join room when socket connects
+  const handleUnlockAudio = async () => {
+    const success = await unlockAudio();
+    if (success) {
+      setAudioUnlocked(true);
+      toast.success('Audio sync enabled!');
+    }
+  };
   useEffect(() => {
     if (connected && auth && !room && !isJoining) {
       joinRoom(code, auth.displayName);
@@ -184,17 +194,36 @@ export default function RoomPage({ params }: RoomPageProps) {
 
   return (
     <div className={styles.roomLayout}>
+      {/* ── Mobile Sidebar Backdrop ── */}
+      {mobileSidebarOpen && (
+        <div
+          className={styles.sidebarBackdrop}
+          onClick={() => setMobileSidebarOpen(false)}
+        />
+      )}
+
       {/* ── Left Sidebar ── */}
-      <aside className={styles.sidebar}>
+      <aside className={`${styles.sidebar} ${mobileSidebarOpen ? styles.sidebarOpen : ''}`}>
         <div className={styles.sidebarHeader}>
-          <div className={styles.sidebarLogo}>
-            <svg width="22" height="22" viewBox="0 0 32 32" fill="none">
-              <rect x="4" y="10" width="4" height="12" rx="2" fill="#1ed760" />
-              <rect x="10" y="6" width="4" height="20" rx="2" fill="#1ed760" opacity="0.8" />
-              <rect x="16" y="2" width="4" height="28" rx="2" fill="#1ed760" />
-              <rect x="22" y="6" width="4" height="20" rx="2" fill="#1ed760" opacity="0.8" />
-            </svg>
-            <span className={styles.sidebarTitle}>SyncWave</span>
+          <div className={styles.sidebarLogoRow}>
+            <div className={styles.sidebarLogo}>
+              <svg width="22" height="22" viewBox="0 0 32 32" fill="none">
+                <rect x="4" y="10" width="4" height="12" rx="2" fill="#1ed760" />
+                <rect x="10" y="6" width="4" height="20" rx="2" fill="#1ed760" opacity="0.8" />
+                <rect x="16" y="2" width="4" height="28" rx="2" fill="#1ed760" />
+                <rect x="22" y="6" width="4" height="20" rx="2" fill="#1ed760" opacity="0.8" />
+              </svg>
+              <span className={styles.sidebarTitle}>SyncWave</span>
+            </div>
+
+            {/* Mobile Close Button */}
+            <button
+              className={styles.closeSidebarBtn}
+              onClick={() => setMobileSidebarOpen(false)}
+              aria-label="Close menu"
+            >
+              <X size={20} />
+            </button>
           </div>
 
           <div className={styles.roomCodeBadge}>
@@ -238,7 +267,10 @@ export default function RoomPage({ params }: RoomPageProps) {
               tracks={room.playlist}
               currentTrackId={playbackState.trackId}
               amHost={amHost}
-              onPlay={(track) => sendPlayback('play', track.id, 0)}
+              onPlay={(track) => {
+                sendPlayback('play', track.id, 0);
+                setMobileSidebarOpen(false); // Close sidebar on mobile after play
+              }}
               onDelete={amHost ? handleDeleteTrack : undefined}
               onAddTrack={() => setShowUpload(true)}
             />
@@ -254,6 +286,28 @@ export default function RoomPage({ params }: RoomPageProps) {
 
       {/* ── Main Content ── */}
       <main className={styles.main}>
+        {/* Mobile Header */}
+        <header className={styles.mobileHeader}>
+          <button
+            className={styles.sidebarToggle}
+            onClick={() => setMobileSidebarOpen(true)}
+            aria-label="Open sidebar"
+          >
+            <Menu size={20} />
+          </button>
+          <div className={styles.mobileTitle}>SyncWave • {room.code}</div>
+          <button
+            className={styles.sidebarToggle}
+            onClick={() => {
+              setActiveTab('playlist');
+              setMobileSidebarOpen(true);
+            }}
+            aria-label="Open playlist"
+          >
+            <Music size={20} />
+          </button>
+        </header>
+
         {/* Sync Status Bar */}
         <SyncStatusBar
           syncState={{ ...syncState, offset: clockSync.offset, rtt: clockSync.rtt, syncedAt: clockSync.syncedAt, isSyncing: clockSync.isSyncing, quality: clockSync.quality }}
@@ -351,6 +405,28 @@ export default function RoomPage({ params }: RoomPageProps) {
           onAddUrl={handleAddUrl}
           onAddYoutube={handleAddYoutube}
         />
+      )}
+
+      {/* ── Audio Tap-to-Unlock Overlay for Mobile Compatibility ── */}
+      {!audioUnlocked && (
+        <div className={styles.unlockOverlay} onClick={handleUnlockAudio}>
+          <div className={styles.unlockCard} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.unlockIcon}>
+              <Headphones size={40} className={styles.pulseIcon} />
+            </div>
+            <h3 className={styles.unlockTitle}>Sync Audio Enabled</h3>
+            <p className={styles.unlockText}>
+              Tap the button below to connect this device to the synchronized audio session.
+            </p>
+            <button
+              className="btn btn-primary btn-lg"
+              style={{ width: '100%' }}
+              onClick={handleUnlockAudio}
+            >
+              Connect Audio Sync
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
