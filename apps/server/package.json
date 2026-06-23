@@ -13,7 +13,6 @@
   },
   "dependencies": {
     "@distube/ytdl-core": "^4.16.12",
-    "@musicsystem/shared": "*",
     "@socket.io/redis-adapter": "^8.3.0",
     "@types/better-sqlite3": "^7.6.13",
     "bcryptjs": "^2.4.3",

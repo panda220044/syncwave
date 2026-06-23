@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import db from '../lib/db';
 import { RedisRoom } from '../lib/redis';
 import { verifyToken } from '../lib/jwt';
-import { PlaybackCommandPayload, PlaybackState } from '@musicsystem/shared';
+import { PlaybackCommandPayload, PlaybackState } from '../types/shared';
 
 // ── Playback Buffer Time ──────────────────────────────────
 // How far in the future to schedule play commands.

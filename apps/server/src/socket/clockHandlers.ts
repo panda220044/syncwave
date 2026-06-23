@@ -1,5 +1,5 @@
 import { Server, Socket } from 'socket.io';
-import { ClockPingPayload, ClockPongPayload } from '@musicsystem/shared';
+import { ClockPingPayload, ClockPongPayload } from '../types/shared';
 
 /**
  * NTP-style clock synchronization handler.

@@ -8,7 +8,7 @@ import {
   Device,
   DeviceReportPayload,
   DeviceVolumePayload,
-} from '@musicsystem/shared';
+} from '../types/shared';
 
 // In-memory map of socketId → { code, deviceId }
 const socketRoomMap = new Map<string, { code: string; deviceId: string }>();
