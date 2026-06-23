@@ -42,11 +42,13 @@ export function registerPlaybackHandlers(io: Server, socket: Socket): void {
         return;
       }
 
-      // Only host can send playback commands
+      // Anyone in the room is allowed to control playback for collaborative sync
+      /*
       if (room.hostId !== user.userId) {
         socket.emit('room:error', { message: 'Only the host can control playback' });
         return;
       }
+      */
 
       const now = Date.now();
       let newState: PlaybackState;

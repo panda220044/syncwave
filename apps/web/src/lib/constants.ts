@@ -1,4 +1,7 @@
-const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:4000';
+const isClient = typeof window !== 'undefined';
+const SERVER_URL =
+  process.env.NEXT_PUBLIC_SERVER_URL ||
+  (isClient ? `${window.location.protocol}//${window.location.hostname}:4000` : 'http://localhost:4000');
 
 export { SERVER_URL };
 

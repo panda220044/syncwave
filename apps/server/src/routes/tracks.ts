@@ -186,8 +186,8 @@ router.delete('/:trackId', authMiddleware, async (req: AuthRequest, res: Respons
   try {
     const { code, trackId } = req.params;
     const room = getRoomAndVerify(code);
-    if (!room || room.hostId !== req.user!.userId) {
-      res.status(403).json({ success: false, error: 'Only the host can remove tracks' });
+    if (!room) {
+      res.status(404).json({ success: false, error: 'Room not found or inactive' });
       return;
     }
 
@@ -221,8 +221,8 @@ router.patch('/reorder', authMiddleware, async (req: AuthRequest, res: Response)
     const { code } = req.params;
     const { order } = req.body as { order: string[] }; // array of track IDs
     const room = getRoomAndVerify(code);
-    if (!room || room.hostId !== req.user!.userId) {
-      res.status(403).json({ success: false, error: 'Only the host can reorder tracks' });
+    if (!room) {
+      res.status(404).json({ success: false, error: 'Room not found or inactive' });
       return;
     }
 

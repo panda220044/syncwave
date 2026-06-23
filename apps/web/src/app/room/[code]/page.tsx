@@ -266,12 +266,12 @@ export default function RoomPage({ params }: RoomPageProps) {
             <TrackList
               tracks={room.playlist}
               currentTrackId={playbackState.trackId}
-              amHost={amHost}
+              amHost={true} // Collaborative: everyone can add/delete/play tracks
               onPlay={(track) => {
                 sendPlayback('play', track.id, 0);
                 setMobileSidebarOpen(false); // Close sidebar on mobile after play
               }}
-              onDelete={amHost ? handleDeleteTrack : undefined}
+              onDelete={handleDeleteTrack} // Collaborative: everyone can delete tracks
               onAddTrack={() => setShowUpload(true)}
             />
           )}
@@ -333,7 +333,7 @@ export default function RoomPage({ params }: RoomPageProps) {
               <>
                 <h2 className={`${styles.trackTitle} text-secondary`}>No track selected</h2>
                 <p className={styles.trackArtist}>
-                  {amHost ? 'Add tracks to your playlist →' : 'Waiting for host to play music...'}
+                  Add tracks to the playlist to get started →
                 </p>
               </>
             )}
@@ -346,7 +346,7 @@ export default function RoomPage({ params }: RoomPageProps) {
           playbackState={playbackState}
           currentTrack={currentTrack}
           playlist={room.playlist}
-          amHost={amHost}
+          amHost={true} // Collaborative: everyone has playback controls enabled
           volume={volume}
           onVolumeChange={setVolume}
           onPlay={() => {
@@ -359,42 +359,40 @@ export default function RoomPage({ params }: RoomPageProps) {
           onPrev={() => sendPlayback('prev', playbackState.trackId || undefined)}
         />
 
-        {/* Host Controls */}
-        {amHost && (
-          <div className={styles.hostControls}>
-            <button
-              id="btn-add-music"
-              className="btn btn-secondary"
-              onClick={() => setShowUpload(true)}
-            >
-              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path d="M12 5v14M5 12h14" strokeLinecap="round" />
-              </svg>
-              Add Music
-            </button>
+        {/* Control Actions Bar */}
+        <div className={styles.hostControls}>
+          <button
+            id="btn-add-music"
+            className="btn btn-secondary"
+            onClick={() => setShowUpload(true)}
+          >
+            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path d="M12 5v14M5 12h14" strokeLinecap="round" />
+            </svg>
+            Add Music
+          </button>
 
-            <button
-              className="btn btn-ghost"
-              onClick={() => setActiveTab('qr')}
-            >
-              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <rect x="3" y="3" width="7" height="7" rx="1" />
-                <rect x="14" y="3" width="7" height="7" rx="1" />
-                <rect x="3" y="14" width="7" height="7" rx="1" />
-                <path d="M14 14h3v3h-3zM17 17h3v3h-3zM14 20h3" />
-              </svg>
-              Invite Friends
-            </button>
+          <button
+            className="btn btn-ghost"
+            onClick={() => setActiveTab('qr')}
+          >
+            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <rect x="3" y="3" width="7" height="7" rx="1" />
+              <rect x="14" y="3" width="7" height="7" rx="1" />
+              <rect x="3" y="14" width="7" height="7" rx="1" />
+              <path d="M14 14h3v3h-3zM17 17h3v3h-3zM14 20h3" />
+            </svg>
+            Invite Friends
+          </button>
 
-            <button
-              className="btn btn-ghost"
-              style={{ color: 'var(--color-error)', marginLeft: 'auto' }}
-              onClick={leaveRoom}
-            >
-              End Session
-            </button>
-          </div>
-        )}
+          <button
+            className="btn btn-ghost"
+            style={{ color: 'var(--color-error)', marginLeft: 'auto' }}
+            onClick={leaveRoom}
+          >
+            {amHost ? 'End Session' : 'Leave Room'}
+          </button>
+        </div>
       </main>
 
       {/* Upload Modal */}
