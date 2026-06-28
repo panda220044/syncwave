@@ -158,13 +158,31 @@ export function useAudioPlayer({ socket, offsetRef, volume }: UseAudioPlayerOpti
       const msUntilStart = startServerTime - serverNow;
 
       // Convert to AudioContext time:
-      // localStartTime = ctx.currentTime + (msUntilStart / 1000) - outputLatency
       const outputLatency = (ctx as any).outputLatency || 0;
       const baseLatency = ctx.baseLatency || 0;
       const totalHwLatency = outputLatency + baseLatency;
 
-      const localStartTime = ctx.currentTime + (msUntilStart / 1000) - totalHwLatency;
-      const effectiveStartTime = Math.max(ctx.currentTime + 0.05, localStartTime);
+      let startOffset = position;
+      let targetStartTime = ctx.currentTime + (msUntilStart / 1000) - totalHwLatency;
+
+      if (msUntilStart < 0) {
+        // Playback has already started in the past. Calculate elapsed time and offset.
+        const elapsedSeconds = -msUntilStart / 1000;
+        startOffset = position + elapsedSeconds;
+
+        if (startOffset >= buffer.duration) {
+          console.log('[Audio] Target position exceeds track duration. Staying idle.');
+          setPlayerState((prev) => ({ ...prev, status: 'idle' }));
+          playbackStatusRef.current = 'idle';
+          return;
+        }
+
+        // Start playing immediately (50ms buffer)
+        targetStartTime = ctx.currentTime + 0.05;
+      } else {
+        // Future start: ensure we schedule it at least 50ms in the future for hardware preparation
+        targetStartTime = Math.max(ctx.currentTime + 0.05, targetStartTime);
+      }
 
       // Create new source node
       const source = ctx.createBufferSource();
@@ -178,26 +196,26 @@ export function useAudioPlayer({ socket, offsetRef, volume }: UseAudioPlayerOpti
         }
       };
 
-      source.start(effectiveStartTime, position);
+      source.start(targetStartTime, startOffset);
       sourceRef.current = source;
 
-      startedAtRef.current = effectiveStartTime;
-      startPositionRef.current = position;
+      startedAtRef.current = targetStartTime;
+      startPositionRef.current = startOffset;
       playbackStatusRef.current = 'playing';
 
       setPlayerState((prev) => ({
         ...prev,
         status: 'playing',
         duration: buffer.duration,
-        currentTime: position,
+        currentTime: startOffset,
       }));
 
       console.log(
-        `[Audio] Scheduled play in ${msUntilStart.toFixed(0)}ms | HW latency: ${(totalHwLatency * 1000).toFixed(1)}ms`
+        `[Audio] Play scheduled. Offset: ${startOffset.toFixed(2)}s | Target time delta: ${(targetStartTime - ctx.currentTime).toFixed(3)}s | Latency: ${(totalHwLatency * 1000).toFixed(1)}ms`
       );
 
       // Start drift reporting
-      startDriftReporting(position, startServerTime);
+      startDriftReporting(startOffset, startServerTime);
     },
     [getAudioContext, stopSource, offsetRef]
   );
@@ -269,7 +287,7 @@ export function useAudioPlayer({ socket, offsetRef, volume }: UseAudioPlayerOpti
 
   // ── Playback Command Handler ──────────────────────────────
   const handlePlaybackCommand = useCallback(
-    async (command: PlaybackState & { serverTime: number }, playlist: Track[]) => {
+    async (command: PlaybackState & { serverTime?: number }, playlist: Track[]) => {
       switch (command.status) {
         case 'playing': {
           if (!command.trackId || !command.startServerTime) return;

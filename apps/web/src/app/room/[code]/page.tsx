@@ -101,6 +101,17 @@ export default function RoomPage({ params }: RoomPageProps) {
     return () => { socket.off('playback:command', handler); };
   }, [socket, room?.playlist, handlePlaybackCommand]);
 
+  // Automatically sync/play music if room is already playing when audio gets unlocked or when room state loads
+  useEffect(() => {
+    if (!audioUnlocked || !room || !room.playlist) return;
+
+    const cmd = room.playbackState;
+    if (cmd && cmd.status === 'playing' && playerState.status === 'idle') {
+      console.log('[Sync] Room is already playing. Syncing playback on join/unlock...', cmd);
+      handlePlaybackCommand(cmd, room.playlist);
+    }
+  }, [audioUnlocked, room, playerState.status, handlePlaybackCommand]);
+
   // Show error
   useEffect(() => {
     if (error) toast.error(error);
